@@ -22,25 +22,49 @@
 			columns: [
 				{
 					"data": "date",
-					"title": "Date"
+					"title": "Date",
+					"className": "dt-center"
 				},
 				{
 					"data": "filename",
-					"title": "File Name"
+					"title": "File Name",
+					"className": "dt-center"
 				},
 				{
 					"data": "action",
-					"title": "Action"
+					"title": "Action",
+					"className": "dt-center"
 				},
 				{
 					"data": "submit-type",
-					"title": "Submit Type"
+					"title": "Submit Type",
+					"className": "dt-center"
 				},
 				{
 					"data": "rating",
-					"title": "Rating"
+					"title": "Rating",
+					"className": "dt-center"
 				}
-			]
+			],
+			createdRow: function(row, data, dataIndex) {
+				var risk = data["rating"].toLowerCase();
+				var color = 'white';
+				switch (risk) {
+					case 'malicious':
+						color = 'red';
+						break;
+					case 'high-risk':
+						color = 'orange';
+						break;
+					case 'medium-risk':
+						color = 'yellow';
+						break;
+					case 'low-risk':
+						color = 'lightyellow';
+						break;
+				}
+				$(row).css('background-color', color);
+			}
 		});
 	}
 
