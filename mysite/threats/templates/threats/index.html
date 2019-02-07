@@ -3,19 +3,55 @@
 <head>
 <title>Remote Test</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script>
-	$.ajax({
-		type: "GET",
-		url: "/threats/data"
-	}).done(function(data) {
-		alert("Success");
-		console.log(data);
-	}).fail(function() {
-		alert("Fail to load data");
+	function fetchData(dataHandlerFunc) {
+		$.ajax({
+			type: "GET",
+			url: "/threats/data"
+		}).done(dataHandlerFunc)
+		.fail(function() {
+			alert("Fail to load data");
+		});
+	}
+
+	function dataHandler(data) {
+		$("#threats_table").DataTable({
+			data: data,
+			columns: [
+				{
+					"data": "date",
+					"title": "Date"
+				},
+				{
+					"data": "filename",
+					"title": "File Name"
+				},
+				{
+					"data": "action",
+					"title": "Action"
+				},
+				{
+					"data": "submit-type",
+					"title": "Submit Type"
+				},
+				{
+					"data": "rating",
+					"title": "Rating"
+				}
+			]
+		});
+	}
+
+	$(document).ready(function() {
+		fetchData(dataHandler);
 	});
 </script>
 </head>
 <body>
+
+<table id="threats_table"></table>
 
 </body>
 </html>
