@@ -15,8 +15,8 @@
 			var timePeriod = $("#time_period").val();
 			var fromDate = calculateFromDate(timePeriod);
 			var toDate = calculateToDate();
-			data = $(data).filter(function(i,data) {
-				var date = new Date(data["rating"]);
+			data = $.grep(data, function(n,i) {
+				var date = new Date(n["date"]);
 				date.setHours(0,0,0,0);
 				if (fromDate && toDate) {
 					return fromDate <= date && date <= toDate;
