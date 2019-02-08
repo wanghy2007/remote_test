@@ -6,18 +6,37 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
 <script>
-	function fetchData(dataHandlerFunc) {
+	function fetchData() {
 		$.ajax({
 			type: "GET",
 			url: "/threats/data"
-		}).done(dataHandlerFunc)
+		})
+		.done(function(data) {
+			var timePeriod = $("#time_period").val();
+			var fromDate = calculateFromDate(timePeriod);
+			var toDate = calculateToDate();
+			data = $(data).filter(function(i,data) {
+				var date = new Date(data["rating"]);
+				date.setHours(0,0,0,0);
+				if (fromDate && toDate) {
+					return fromDate <= date && date <= toDate;
+				}
+				return true;
+			});
+			populateTable(data);
+		})
 		.fail(function() {
 			alert("Fail to load data");
 		});
 	}
 
-	function dataHandler(data) {
-		$("#threats_table").DataTable({
+	function populateTable(data) {
+		if ($.fn.dataTable.isDataTable("#threats_table")) {
+			$("#threats_table").DataTable().destroy();
+		}
+		return $("#threats_table").DataTable({
+			bFilter: false,
+			bPaginate: false,
 			data: data,
 			columns: [
 				{
@@ -46,35 +65,71 @@
 					"className": "dt-center"
 				}
 			],
+			// color code table rows
 			createdRow: function(row, data, dataIndex) {
-				var risk = data["rating"].toLowerCase();
-				var color = 'white';
+				var risk = data["rating"].toLowerCase().trim();
+				var color = "white";
 				switch (risk) {
-					case 'malicious':
-						color = 'red';
+					case "malicious":
+						color = "red";
 						break;
-					case 'high-risk':
-						color = 'orange';
+					case "high-risk":
+						color = "orange";
 						break;
-					case 'medium-risk':
-						color = 'yellow';
+					case "medium-risk":
+						color = "yellow";
 						break;
-					case 'low-risk':
-						color = 'lightyellow';
+					case "low-risk":
+						color = "lightyellow";
 						break;
 				}
-				$(row).css('background-color', color);
+				$(row).css("background-color", color);
 			}
 		});
 	}
 
+	function calculateFromDate(timePeriod) {
+		var fromDate = new Date();
+		fromDate.setHours(0,0,0,0);
+		switch (timePeriod) {
+			case "24_hours":
+				fromDate.setDate(fromDate.getDate()-1);
+				break;
+			case "7_days":
+				fromDate.setDate(fromDate.getDate()-7);
+				break;
+			case "4_weeks":
+				fromDate.setDate(fromDate.getDate()-28);
+				break;
+			case "all":
+				fromDate = null;
+		};
+		return fromDate;
+	}
+
+	function calculateToDate() {
+		var toDate = new Date();
+		toDate.setHours(0,0,0,0);
+		return toDate;
+	}
+
 	$(document).ready(function() {
-		fetchData(dataHandler);
+		fetchData();
+		$("#time_period").change(function() {
+			fetchData();
+		});
 	});
 </script>
 </head>
 <body>
 
+Time Period:
+<select id="time_period">
+	<option value="all">All</option>
+	<option value="24_hours">24 hours</option>
+	<option value="7_days">7 days</option>
+	<option value="4_weeks">4 weeks</option>
+</select>
 <table id="threats_table"></table>
 
 </body>
